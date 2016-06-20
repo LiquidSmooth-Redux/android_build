@@ -20,9 +20,9 @@ LOCAL_PATH := $(BUILD_SYSTEM)
 ifneq "" "$(filter eng.%,$(BUILD_NUMBER))"
   # BUILD_NUMBER has a timestamp in it, which means that
   # it will change every time.  Pick a stable value.
-  FILE_NAME_TAG := eng.$(USER)
-else
   FILE_NAME_TAG := $(BUILD_NUMBER)
+else
+  FILE_NAME_TAG := eng.$(USER) 
 endif
 
 # -----------------------------------------------------------------
@@ -1924,8 +1924,29 @@ $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(DISTTOOLS)
 
 LIQUID_TARGET_PACKAGE := $(PRODUCT_OUT)/liquid-$(LIQUID_VERSION).zip
 
-.PHONY: otapackage bacon
+.PHONY: otapackage liquid
 otapackage: $(INTERNAL_OTA_PACKAGE_TARGET)
+
+liquid: check_liquid otapackage
+ifneq ($(LIQUID_BUILD),)
+	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(LIQUID_TARGET_PACKAGE)
+	$(hide) $(MD5SUM) $(LIQUID_TARGET_PACKAGE) > $(LIQUID_TARGET_PACKAGE).md5sum
+	@echo -e ${CL_BLU}""${CL_BLU}
+	@echo -e ${CL_BLU}"       __                        _______                      __  __ "${CL_BLU}
+	@echo -e ${CL_BLU}"      / /   __ ___  __  __ _ ___/ / ___/ ___ ____  ___  ___  / /_/ /_ "${CL_BLU}
+	@echo -e ${CL_BLU}"     / /   / / __ '/ / / / / __  /\__  \/ __' __ \/__ \/__ \/ __/ __ \ "${CL_BLU}
+	@echo -e ${CL_BLU}"    / /___/ / /_/ / /_/ / / /_/ /___/  / / / / / //_/ //_/ / /_/ / / / "${CL_BLU}
+	@echo -e ${CL_BLU}"   /_____/_/\__, /\__,_/_/\__,_//____ /_/ /_/ /_/\___/\___/\__/_/ /_/ "${CL_BLU}
+	@echo -e ${CL_BLU}"              /_/       Liquid-MarshMallow"${CL_BLU}
+	@echo -e ${CL_BLU}""${CL_BLU}
+	@echo -e ${CL_CYN}"Package Complete: $(LIQUID_TARGET_PACKAGE)"${CL_CYAN}${CL_RST}
+endif
+
+check_liquid:
+ifneq ($(TARGET_CUSTOM_RELEASETOOL),)
+        $(error TARGET_CUSTOM_RELEASETOOL is deprecated)
+endif
+ 
 bacon: otapackage
 	$(hide) ln -f $(INTERNAL_OTA_PACKAGE_TARGET) $(LIQUID_TARGET_PACKAGE)
 	$(hide) $(MD5SUM) $(LIQUID_TARGET_PACKAGE) > $(LIQUID_TARGET_PACKAGE).md5sum
